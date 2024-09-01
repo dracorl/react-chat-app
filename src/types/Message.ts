@@ -3,4 +3,5 @@ export interface Message {
   text: string
   isOutgoing: boolean
   timestamp: Date
+  isImage?: boolean
 }

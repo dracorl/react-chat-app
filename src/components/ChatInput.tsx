@@ -43,6 +43,15 @@ const SendButton = styled.button`
   align-items: center;
   justify-content: center;
 `
+const PreviewContainer = styled.div`
+  margin-bottom: 10px;
+`
+
+const PreviewImage = styled.img`
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+`
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void
@@ -50,12 +59,22 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
   const [message, setMessage] = useState("")
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "auto"
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`
+    }
+
+    // "/image" komutunu kontrol et
+    const imageMatch = message.match(/^\/image\s+(\d+)$/)
+    if (imageMatch) {
+      const imageNumber = imageMatch[1]
+      setPreviewImage(`https://picsum.photos/seed/${imageNumber}/300/200`)
+    } else {
+      setPreviewImage(null)
     }
   }, [message])
 
@@ -67,28 +86,36 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
     if (message.trim()) {
       onSendMessage(message.trim())
       setMessage("")
+      setPreviewImage(null)
     }
   }
 
   return (
-    <InputContainer>
-      <TextArea
-        ref={textAreaRef}
-        value={message}
-        onChange={handleInputChange}
-        placeholder="Type your message here..."
-        rows={1}
-        onKeyDown={e => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault()
-            handleSendMessage()
-          }
-        }}
-      />
-      <SendButton onClick={handleSendMessage} disabled={!message.trim()}>
-        <MdSend />
-      </SendButton>
-    </InputContainer>
+    <>
+      {previewImage && (
+        <PreviewContainer>
+          <PreviewImage src={previewImage} alt="Preview" />
+        </PreviewContainer>
+      )}
+      <InputContainer>
+        <TextArea
+          ref={textAreaRef}
+          value={message}
+          onChange={handleInputChange}
+          placeholder="Type your message or use /image command"
+          rows={1}
+          onKeyDown={e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault()
+              handleSendMessage()
+            }
+          }}
+        />
+        <SendButton onClick={handleSendMessage} disabled={!message.trim()}>
+          <MdSend />
+        </SendButton>
+      </InputContainer>
+    </>
   )
 }
 

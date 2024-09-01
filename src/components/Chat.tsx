@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from "react"
+import React, {useState} from "react"
 import styled from "styled-components"
 import ChatHeader from "./ChatHeader"
 import MessageList from "./MessageList"
@@ -13,6 +13,7 @@ const ChatContainer = styled.div`
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  height: 100%; // Tam yükseklik kullan
 `
 
 const ChatBackground = styled.div`
@@ -33,6 +34,14 @@ const ChatContent = styled.div`
   flex-direction: column;
   position: relative;
   z-index: 1;
+  height: 100%; // Tam yükseklik kullan
+`
+
+const ScrollableContent = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 `
 
 interface ChatProps {
@@ -45,23 +54,34 @@ const Chat: React.FC<ChatProps> = ({selectedChat, onBack}) => {
     {id: 1, text: "Hello!", isOutgoing: false, timestamp: new Date()},
     {id: 2, text: "Hi, how are you?", isOutgoing: true, timestamp: new Date()}
   ])
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({behavior: "smooth"})
-  }, [messages])
 
   const handleSendMessage = (message: string) => {
     if (message.trim()) {
-      setMessages([
-        ...messages,
-        {
-          id: messages.length + 1,
-          text: message,
-          isOutgoing: true,
-          timestamp: new Date()
-        }
-      ])
+      const imageMatch = message.match(/^\/image\s+(\d+)$/)
+      if (imageMatch) {
+        const imageNumber = imageMatch[1]
+        const imageUrl = `https://picsum.photos/seed/${imageNumber}/300/200`
+        setMessages([
+          ...messages,
+          {
+            id: messages.length + 1,
+            text: imageUrl,
+            isOutgoing: true,
+            timestamp: new Date(),
+            isImage: true
+          }
+        ])
+      } else {
+        setMessages([
+          ...messages,
+          {
+            id: messages.length + 1,
+            text: message,
+            isOutgoing: true,
+            timestamp: new Date()
+          }
+        ])
+      }
     }
   }
 
@@ -71,7 +91,9 @@ const Chat: React.FC<ChatProps> = ({selectedChat, onBack}) => {
       {selectedChat ? (
         <ChatContent>
           <ChatHeader selectedChat={selectedChat} onBack={onBack} />
-          <MessageList messages={messages} messagesEndRef={messagesEndRef} />
+          <ScrollableContent>
+            <MessageList messages={messages} />
+          </ScrollableContent>
           <ChatInput onSendMessage={handleSendMessage} />
         </ChatContent>
       ) : (

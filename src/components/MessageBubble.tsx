@@ -18,17 +18,29 @@ const MessageText = styled.p`
 `
 
 const MessageTime = styled.span`
-  position: absolute;
-  right: 8px;
-  bottom: 3px;
+  display: block;
   font-size: 0.75rem;
   color: #999;
+  text-align: right;
+  margin-top: 4px;
+`
+
+const MessageImage = styled.img`
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 4px;
+`
+
+const MessageContent = styled.div`
+  display: flex;
+  flex-direction: column;
 `
 
 interface MessageBubbleProps {
   text: string
   isOutgoing: boolean
   timestamp: Date
+  isImage?: boolean
 }
 
 const formatTime = (date: Date) => {
@@ -38,12 +50,19 @@ const formatTime = (date: Date) => {
 const MessageBubble: React.FC<MessageBubbleProps> = ({
   text,
   isOutgoing,
-  timestamp
+  timestamp,
+  isImage = false
 }) => {
   return (
     <BubbleContainer isOutgoing={isOutgoing}>
-      <MessageText>{text}</MessageText>
-      <MessageTime>{formatTime(timestamp)}</MessageTime>
+      <MessageContent>
+        {isImage ? (
+          <MessageImage src={text} alt="Sent Image" />
+        ) : (
+          <MessageText>{text}</MessageText>
+        )}
+        <MessageTime>{formatTime(timestamp)}</MessageTime>
+      </MessageContent>
     </BubbleContainer>
   )
 }
