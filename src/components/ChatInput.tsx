@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect} from "react"
 import styled from "styled-components"
 import {MdSend} from "react-icons/md"
+import ComboBox from "./ComboBox"
 
 const InputContainer = styled.div`
   padding: 10px;
@@ -43,6 +44,7 @@ const SendButton = styled.button`
   align-items: center;
   justify-content: center;
 `
+
 const PreviewContainer = styled.div`
   margin-bottom: 10px;
 `
@@ -53,6 +55,10 @@ const PreviewImage = styled.img`
   border-radius: 8px;
 `
 
+const ComboBoxContainer = styled.div`
+  margin-bottom: 10px;
+`
+
 interface ChatInputProps {
   onSendMessage: (message: string) => void
 }
@@ -60,6 +66,7 @@ interface ChatInputProps {
 const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
   const [message, setMessage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [showComboBox, setShowComboBox] = useState(false)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -68,13 +75,20 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`
     }
 
-    // "/image" komutunu kontrol et
+    // Check for "/image" command
     const imageMatch = message.match(/^\/image\s+(\d+)$/)
     if (imageMatch) {
       const imageNumber = imageMatch[1]
       setPreviewImage(`https://picsum.photos/seed/${imageNumber}/300/200`)
     } else {
       setPreviewImage(null)
+    }
+
+    // Check for "/select" command
+    if (message.trim() === "/select") {
+      setShowComboBox(true)
+    } else {
+      setShowComboBox(false)
     }
   }, [message])
 
@@ -87,7 +101,14 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
       onSendMessage(message.trim())
       setMessage("")
       setPreviewImage(null)
+      setShowComboBox(false)
     }
+  }
+
+  const handleComboBoxSelect = (selected: string) => {
+    onSendMessage(selected)
+    setMessage("")
+    setShowComboBox(false)
   }
 
   return (
@@ -97,12 +118,17 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
           <PreviewImage src={previewImage} alt="Preview" />
         </PreviewContainer>
       )}
+      {showComboBox && (
+        <ComboBoxContainer>
+          <ComboBox onSelect={handleComboBoxSelect} />
+        </ComboBoxContainer>
+      )}
       <InputContainer>
         <TextArea
           ref={textAreaRef}
           value={message}
           onChange={handleInputChange}
-          placeholder="Type your message or use /image command"
+          placeholder="Type your message, use /image command, or /select for quick replies..."
           rows={1}
           onKeyDown={e => {
             if (e.key === "Enter" && !e.shiftKey) {
