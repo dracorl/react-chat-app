@@ -54,34 +54,41 @@ const Chat: React.FC<ChatProps> = ({selectedChat, onBack}) => {
     {id: 1, text: "Hello!", isOutgoing: false, timestamp: new Date()},
     {id: 2, text: "Hi, how are you?", isOutgoing: true, timestamp: new Date()}
   ])
+  const [error, setError] = useState<string | null>(null)
 
   const handleSendMessage = (message: string) => {
-    if (message.trim()) {
-      const imageMatch = message.match(/^\/image\s+(\d+)$/)
-      if (imageMatch) {
-        const imageNumber = imageMatch[1]
-        const imageUrl = `https://picsum.photos/seed/${imageNumber}/300/200`
-        setMessages([
-          ...messages,
-          {
-            id: messages.length + 1,
-            text: imageUrl,
-            isOutgoing: true,
-            timestamp: new Date(),
-            isImage: true
-          }
-        ])
-      } else {
-        setMessages([
-          ...messages,
-          {
-            id: messages.length + 1,
-            text: message,
-            isOutgoing: true,
-            timestamp: new Date()
-          }
-        ])
+    try {
+      if (message.trim()) {
+        const imageMatch = message.match(/^\/image\s+(\d+)$/)
+        if (imageMatch) {
+          const imageNumber = imageMatch[1]
+          const imageUrl = `https://picsum.photos/seed/${imageNumber}/300/200`
+          setMessages([
+            ...messages,
+            {
+              id: messages.length + 1,
+              text: imageUrl,
+              isOutgoing: true,
+              timestamp: new Date(),
+              isImage: true
+            }
+          ])
+        } else {
+          setMessages([
+            ...messages,
+            {
+              id: messages.length + 1,
+              text: message,
+              isOutgoing: true,
+              timestamp: new Date()
+            }
+          ])
+        }
+        setError(null)
       }
+    } catch (err) {
+      console.error("Error sending message:", err)
+      setError("Failed to send message. Please try again.")
     }
   }
 
@@ -92,6 +99,9 @@ const Chat: React.FC<ChatProps> = ({selectedChat, onBack}) => {
         <ChatContent>
           <ChatHeader selectedChat={selectedChat} onBack={onBack} />
           <ScrollableContent>
+            {error && (
+              <div style={{color: "red", padding: "10px"}}>{error}</div>
+            )}
             <MessageList messages={messages} />
           </ScrollableContent>
           <ChatInput onSendMessage={handleSendMessage} />

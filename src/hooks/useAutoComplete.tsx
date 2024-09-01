@@ -25,20 +25,27 @@ const commonPhrases = [
 
 const useAutoComplete = (input: string) => {
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (input.length > 0) {
-      const matchedPhrases = commonPhrases.filter(phrase =>
-        phrase.toLowerCase().startsWith(input.toLowerCase())
-      )
-      setSuggestions(matchedPhrases)
-      console.log("Suggestions:", matchedPhrases) // Eklenen log
-    } else {
+    try {
+      if (input.length > 0) {
+        const matchedPhrases = commonPhrases.filter(phrase =>
+          phrase.toLowerCase().startsWith(input.toLowerCase())
+        )
+        setSuggestions(matchedPhrases)
+        setError(null)
+      } else {
+        setSuggestions([])
+      }
+    } catch (err) {
+      console.error("Error generating suggestions:", err)
+      setError("Failed to generate suggestions. Please try again.")
       setSuggestions([])
     }
   }, [input])
 
-  return suggestions
+  return {suggestions, error}
 }
 
 export default useAutoComplete

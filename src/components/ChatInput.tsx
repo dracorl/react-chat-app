@@ -89,10 +89,10 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
   const [message, setMessage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [showComboBox, setShowComboBox] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const suggestions = useAutoComplete(message)
+  const {suggestions, error: autoCompleteError} = useAutoComplete(message)
 
-  console.log("Current suggestions:", suggestions)
   useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "auto"
@@ -118,21 +118,36 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value)
+    setError(null)
   }
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      onSendMessage(message.trim())
-      setMessage("")
-      setPreviewImage(null)
-      setShowComboBox(false)
+      try {
+        onSendMessage(message.trim())
+        setMessage("")
+        setPreviewImage(null)
+        setShowComboBox(false)
+        setError(null)
+      } catch (err) {
+        console.error("Error sending message:", err)
+        setError("Failed to send message. Please try again.")
+      }
+    } else {
+      setError("Message cannot be empty")
     }
   }
 
   const handleComboBoxSelect = (selected: string) => {
-    onSendMessage(selected)
-    setMessage("")
-    setShowComboBox(false)
+    try {
+      onSendMessage(selected)
+      setMessage("")
+      setShowComboBox(false)
+      setError(null)
+    } catch (err) {
+      console.error("Error sending quick reply:", err)
+      setError("Failed to send quick reply. Please try again.")
+    }
   }
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -144,6 +159,12 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
 
   return (
     <>
+      {error && <div style={{color: "red", marginBottom: "10px"}}>{error}</div>}
+      {autoCompleteError && (
+        <div style={{color: "red", marginBottom: "10px"}}>
+          {autoCompleteError}
+        </div>
+      )}
       {previewImage && (
         <PreviewContainer>
           <PreviewImage src={previewImage} alt="Preview" />
@@ -157,7 +178,7 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
       <InputContainer>
         {suggestions.length > 0 && (
           <SuggestionsContainer>
-            {suggestions.map((suggestion, index) => (
+            {suggestions.map((suggestion: string, index: number) => (
               <SuggestionItem
                 key={index}
                 onClick={() => handleSuggestionClick(suggestion)}
