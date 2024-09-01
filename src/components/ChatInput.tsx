@@ -2,12 +2,14 @@ import React, {useState, useRef, useEffect} from "react"
 import styled from "styled-components"
 import {MdSend} from "react-icons/md"
 import ComboBox from "./ComboBox"
+import useAutoComplete from "../hooks/useAutoComplete"
 
 const InputContainer = styled.div`
   padding: 10px;
   background-color: #f0f0f0;
   display: flex;
   align-items: center;
+  position: relative; // Relative pozisyon ekleyelim
 `
 
 const TextArea = styled.textarea`
@@ -58,6 +60,26 @@ const PreviewImage = styled.img`
 const ComboBoxContainer = styled.div`
   margin-bottom: 10px;
 `
+const SuggestionsContainer = styled.div`
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000; // Yüksek bir z-index ekleyelim
+`
+
+const SuggestionItem = styled.div`
+  padding: 8px;
+  cursor: pointer;
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void
@@ -68,7 +90,9 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [showComboBox, setShowComboBox] = useState(false)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
+  const suggestions = useAutoComplete(message)
 
+  console.log("Current suggestions:", suggestions)
   useEffect(() => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "auto"
@@ -111,6 +135,13 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
     setShowComboBox(false)
   }
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setMessage(suggestion)
+    if (textAreaRef.current) {
+      textAreaRef.current.focus()
+    }
+  }
+
   return (
     <>
       {previewImage && (
@@ -124,6 +155,18 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
         </ComboBoxContainer>
       )}
       <InputContainer>
+        {suggestions.length > 0 && (
+          <SuggestionsContainer>
+            {suggestions.map((suggestion, index) => (
+              <SuggestionItem
+                key={index}
+                onClick={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </SuggestionItem>
+            ))}
+          </SuggestionsContainer>
+        )}
         <TextArea
           ref={textAreaRef}
           value={message}
