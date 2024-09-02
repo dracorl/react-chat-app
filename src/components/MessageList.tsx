@@ -11,6 +11,11 @@ const MessageListContainer = styled.div`
   flex-direction: column;
   position: relative;
   z-index: 1;
+  @media (max-width: 768px) {
+    padding-top: 60px;
+    height: calc(100vh - 120px); // 60px üst başlık, 60px alt giriş alanı için
+    overflow-y: auto;
+  }
 `
 
 interface MessageListProps {

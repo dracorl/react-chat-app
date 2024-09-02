@@ -10,6 +10,14 @@ const Header = styled.div`
   align-items: center;
   justify-content: space-between;
   height: 60px;
+
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
 `
 
 const LeftSection = styled.div`
@@ -85,6 +93,15 @@ const IconButton = styled.button`
   margin-left: 8px;
 `
 
+const MobileSpacerDiv = styled.div`
+  display: none;
+  height: 60px;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`
+
 interface ChatHeaderProps {
   selectedChat: {
     id: string
@@ -95,35 +112,38 @@ interface ChatHeaderProps {
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({selectedChat, onBack}) => (
-  <Header>
-    <LeftSection>
-      <BackButton
-        onClick={onBack}
-        aria-label="Go back"
-        data-testid="back-button"
-      >
-        <MdArrowBack size={24} />
-      </BackButton>
-      <ProfileSection>
-        <ProfilePic
-          src={`https://picsum.photos/seed/${selectedChat.id}/40`}
-          alt={selectedChat.name}
-        />
-        <UserInfo>
-          <ChatName>{selectedChat.name}</ChatName>
-          <LastSeen>Last seen {selectedChat.lastSeen}</LastSeen>
-        </UserInfo>
-      </ProfileSection>
-    </LeftSection>
-    <RightSection>
-      <IconButton>
-        <MdSearch size={20} />
-      </IconButton>
-      <IconButton>
-        <MdMoreVert size={20} />
-      </IconButton>
-    </RightSection>
-  </Header>
+  <>
+    <Header>
+      <LeftSection>
+        <BackButton
+          onClick={onBack}
+          aria-label="Go back"
+          data-testid="back-button"
+        >
+          <MdArrowBack size={24} />
+        </BackButton>
+        <ProfileSection>
+          <ProfilePic
+            src={`https://picsum.photos/seed/${selectedChat.id}/40`}
+            alt={selectedChat.name}
+          />
+          <UserInfo>
+            <ChatName>{selectedChat.name}</ChatName>
+            <LastSeen>Last seen {selectedChat.lastSeen}</LastSeen>
+          </UserInfo>
+        </ProfileSection>
+      </LeftSection>
+      <RightSection>
+        <IconButton>
+          <MdSearch size={20} />
+        </IconButton>
+        <IconButton>
+          <MdMoreVert size={20} />
+        </IconButton>
+      </RightSection>
+    </Header>
+    <MobileSpacerDiv />
+  </>
 )
 
 export default ChatHeader
