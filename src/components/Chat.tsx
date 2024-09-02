@@ -7,10 +7,13 @@ import WelcomeScreen from "./WelcomeScreen"
 import {Chat as ChatType} from "../types/Chat"
 import {ChatUser} from "../types/ChatUser"
 import {Message} from "../types/Message"
-import backgroundImage from "../assets/background.png"
+import {getBackgroundImage} from "../utils/imageImports"
+
+const backgroundImage = getBackgroundImage()
 
 const ChatContainer = styled.div`
   flex: 1;
+  background-image: url(${backgroundImage});
   display: flex;
   flex-direction: column;
   position: relative;
@@ -26,7 +29,7 @@ const ChatBackground = styled.div`
   bottom: 0;
   background-image: url(${backgroundImage});
   background-repeat: repeat;
-  opacity: 0.05;
+  opacity: 0;
   z-index: 0;
 `
 
@@ -37,6 +40,7 @@ const ChatContent = styled.div`
   position: relative;
   z-index: 1;
   height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
 `
 
 const ScrollableContent = styled.div`

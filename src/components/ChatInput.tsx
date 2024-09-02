@@ -45,6 +45,8 @@ const SendButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  aria-label="Send message"
+  data-testid="send-button"
 `
 
 const PreviewContainer = styled.div`
@@ -205,7 +207,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
             }
           }}
         />
-        <SendButton onClick={handleSendMessage} disabled={!message.trim()}>
+        <SendButton
+          onClick={handleSendMessage}
+          disabled={!message.trim()}
+          aria-label="Send message"
+          data-testid="send-button"
+        >
           <MdSend />
         </SendButton>
       </InputContainer>

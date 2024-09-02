@@ -3,7 +3,7 @@ import styled from "styled-components"
 import MessageBubble from "./MessageBubble"
 import {Message} from "../types/Message"
 
-const MessagesContainer = styled.div`
+const MessageListContainer = styled.div`
   flex: 1;
   overflow-y: auto;
   padding: 10px;
@@ -21,7 +21,12 @@ const MessageList: React.FC<MessageListProps> = ({messages}) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({behavior: "smooth"})
+    if (
+      messagesEndRef.current &&
+      typeof messagesEndRef.current.scrollIntoView === "function"
+    ) {
+      messagesEndRef.current.scrollIntoView({behavior: "smooth"})
+    }
   }
 
   useEffect(() => {
@@ -29,7 +34,7 @@ const MessageList: React.FC<MessageListProps> = ({messages}) => {
   }, [messages])
 
   return (
-    <MessagesContainer>
+    <MessageListContainer>
       {messages.map(msg => (
         <MessageBubble
           key={msg.id}
@@ -40,7 +45,7 @@ const MessageList: React.FC<MessageListProps> = ({messages}) => {
         />
       ))}
       <div ref={messagesEndRef} />
-    </MessagesContainer>
+    </MessageListContainer>
   )
 }
 

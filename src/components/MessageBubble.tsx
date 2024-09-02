@@ -1,14 +1,18 @@
 import React from "react"
 import styled from "styled-components"
 
-const BubbleContainer = styled.div<{isOutgoing: boolean}>`
+interface BubbleProps {
+  $isOutgoing: boolean
+}
+
+const BubbleContainer = styled.div<BubbleProps>`
   max-width: 60%;
   padding: 8px 12px;
   border-radius: 8px;
   margin-bottom: 8px;
   position: relative;
-  align-self: ${props => (props.isOutgoing ? "flex-end" : "flex-start")};
-  background-color: ${props => (props.isOutgoing ? "#dcf8c6" : "#ffffff")};
+  align-self: ${props => (props.$isOutgoing ? "flex-end" : "flex-start")};
+  background-color: ${props => (props.$isOutgoing ? "#dcf8c6" : "#ffffff")};
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 `
 
@@ -43,10 +47,6 @@ interface MessageBubbleProps {
   isImage?: boolean
 }
 
-const formatTime = (date: Date) => {
-  return date.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})
-}
-
 const MessageBubble: React.FC<MessageBubbleProps> = ({
   text,
   isOutgoing,
@@ -54,14 +54,21 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   isImage = false
 }) => {
   return (
-    <BubbleContainer isOutgoing={isOutgoing}>
+    <BubbleContainer $isOutgoing={isOutgoing}>
       <MessageContent>
         {isImage ? (
           <MessageImage src={text} alt="Sent Image" />
         ) : (
           <MessageText>{text}</MessageText>
         )}
-        <MessageTime>{formatTime(timestamp)}</MessageTime>
+        <MessageTime>
+          {timestamp instanceof Date
+            ? timestamp.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+              })
+            : timestamp}
+        </MessageTime>
       </MessageContent>
     </BubbleContainer>
   )

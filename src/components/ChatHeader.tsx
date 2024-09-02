@@ -97,7 +97,11 @@ interface ChatHeaderProps {
 const ChatHeader: React.FC<ChatHeaderProps> = ({selectedChat, onBack}) => (
   <Header>
     <LeftSection>
-      <BackButton onClick={onBack}>
+      <BackButton
+        onClick={onBack}
+        aria-label="Go back"
+        data-testid="back-button"
+      >
         <MdArrowBack size={24} />
       </BackButton>
       <ProfileSection>
