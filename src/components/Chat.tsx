@@ -1,9 +1,11 @@
-import React, {useState} from "react"
+import React, {useState, useEffect, useCallback} from "react"
 import styled from "styled-components"
 import ChatHeader from "./ChatHeader"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
 import WelcomeScreen from "./WelcomeScreen"
+import {Chat as ChatType} from "../types/Chat"
+import {ChatUser} from "../types/ChatUser"
 import {Message} from "../types/Message"
 import backgroundImage from "../assets/background.png"
 
@@ -13,7 +15,7 @@ const ChatContainer = styled.div`
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  height: 100%; // Tam yükseklik kullan
+  height: 100%;
 `
 
 const ChatBackground = styled.div`
@@ -34,7 +36,7 @@ const ChatContent = styled.div`
   flex-direction: column;
   position: relative;
   z-index: 1;
-  height: 100%; // Tam yükseklik kullan
+  height: 100%;
 `
 
 const ScrollableContent = styled.div`
@@ -47,64 +49,106 @@ const ScrollableContent = styled.div`
 interface ChatProps {
   selectedChat: string | null
   onBack: () => void
+  chats: (ChatType & ChatUser)[]
 }
 
-const Chat: React.FC<ChatProps> = ({selectedChat, onBack}) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {id: 1, text: "Hello!", isOutgoing: false, timestamp: new Date()},
-    {id: 2, text: "Hi, how are you?", isOutgoing: true, timestamp: new Date()}
-  ])
+const Chat: React.FC<ChatProps> = ({selectedChat, onBack, chats}) => {
+  const [chatMessages, setChatMessages] = useState<{[key: string]: Message[]}>(
+    {}
+  )
   const [error, setError] = useState<string | null>(null)
 
-  const handleSendMessage = (message: string) => {
-    try {
-      if (message.trim()) {
-        const imageMatch = message.match(/^\/image\s+(\d+)$/)
-        if (imageMatch) {
-          const imageNumber = imageMatch[1]
-          const imageUrl = `https://picsum.photos/seed/${imageNumber}/300/200`
-          setMessages([
-            ...messages,
-            {
-              id: messages.length + 1,
-              text: imageUrl,
-              isOutgoing: true,
-              timestamp: new Date(),
-              isImage: true
-            }
-          ])
-        } else {
-          setMessages([
-            ...messages,
-            {
-              id: messages.length + 1,
-              text: message,
-              isOutgoing: true,
-              timestamp: new Date()
-            }
-          ])
+  const addMessage = useCallback(
+    (
+      userId: string,
+      text: string,
+      isOutgoing: boolean,
+      isImage: boolean = false
+    ) => {
+      setChatMessages(prevMessages => ({
+        ...prevMessages,
+        [userId]: [
+          ...(prevMessages[userId] || []),
+          {
+            id: (prevMessages[userId]?.length || 0) + 1,
+            text,
+            isOutgoing,
+            timestamp: new Date(),
+            isImage
+          }
+        ]
+      }))
+    },
+    []
+  )
+
+  useEffect(() => {
+    if (selectedChat) {
+      const lastMessage = chatMessages[selectedChat]?.slice(-1)[0]
+      if (lastMessage && lastMessage.isOutgoing) {
+        let response: string | null = null
+
+        if (lastMessage.isImage) {
+          response = "Very lovely picture!"
         }
-        setError(null)
+
+        if (response) {
+          setTimeout(() => {
+            addMessage(selectedChat, response, false)
+          }, 500)
+        }
       }
-    } catch (err) {
-      console.error("Error sending message:", err)
-      setError("Failed to send message. Please try again.")
+    }
+  }, [chatMessages, selectedChat, addMessage])
+
+  const handleSendMessage = (message: string) => {
+    if (selectedChat) {
+      try {
+        if (message.trim()) {
+          const imageMatch = message.match(/^\/image\s+(\d+)$/)
+          if (imageMatch) {
+            const imageNumber = imageMatch[1]
+            const imageUrl = `https://picsum.photos/seed/${imageNumber}/300/200`
+            addMessage(selectedChat, imageUrl, true, true)
+          } else {
+            addMessage(selectedChat, message, true)
+          }
+          setError(null)
+        }
+      } catch (err) {
+        console.error("Error sending message:", err)
+        setError("Failed to send message. Please try again.")
+      }
     }
   }
+
+  const handleComboBoxSelect = (selected: string) => {
+    if (selectedChat) {
+      addMessage(selectedChat, selected, true)
+      setTimeout(() => {
+        addMessage(selectedChat, "Ok", false)
+      }, 500)
+    }
+  }
+
+  const selectedChatData = chats.find(chat => chat.id === selectedChat)
 
   return (
     <ChatContainer>
       <ChatBackground />
-      {selectedChat ? (
+      {selectedChat && selectedChatData ? (
         <ChatContent>
-          <ChatHeader selectedChat={selectedChat} onBack={onBack} />
+          <ChatHeader selectedChat={selectedChatData} onBack={onBack} />
           <ScrollableContent>
             {error && (
               <div style={{color: "red", padding: "10px"}}>{error}</div>
             )}
-            <MessageList messages={messages} />
+            <MessageList messages={chatMessages[selectedChat] || []} />
           </ScrollableContent>
-          <ChatInput onSendMessage={handleSendMessage} />
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            onComboBoxSelect={handleComboBoxSelect}
+          />
         </ChatContent>
       ) : (
         <WelcomeScreen />

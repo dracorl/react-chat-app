@@ -74,7 +74,7 @@ const ChatItem: React.FC<ChatItemProps> = ({chat, onClick}) => (
       <ChatName>{chat.partnerName}</ChatName>
       <LastMessage>{chat.lastMessage}</LastMessage>
     </ChatInfo>
-    <ChatDate>{new Date(chat.timestamp).toLocaleString()}</ChatDate>
+    <ChatDate>{chat.timestamp}</ChatDate>
   </ChatItemContainer>
 )
 

@@ -9,7 +9,7 @@ const InputContainer = styled.div`
   background-color: #f0f0f0;
   display: flex;
   align-items: center;
-  position: relative; // Relative pozisyon ekleyelim
+  position: relative;
 `
 
 const TextArea = styled.textarea`
@@ -70,7 +70,7 @@ const SuggestionsContainer = styled.div`
   border-radius: 4px;
   max-height: 150px;
   overflow-y: auto;
-  z-index: 1000; // Yüksek bir z-index ekleyelim
+  z-index: 1000;
 `
 
 const SuggestionItem = styled.div`
@@ -83,9 +83,13 @@ const SuggestionItem = styled.div`
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void
+  onComboBoxSelect: (selected: string) => void
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
+const ChatInput: React.FC<ChatInputProps> = ({
+  onSendMessage,
+  onComboBoxSelect
+}) => {
   const [message, setMessage] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [showComboBox, setShowComboBox] = useState(false)
@@ -140,7 +144,7 @@ const ChatInput: React.FC<ChatInputProps> = ({onSendMessage}) => {
 
   const handleComboBoxSelect = (selected: string) => {
     try {
-      onSendMessage(selected)
+      onComboBoxSelect(selected)
       setMessage("")
       setShowComboBox(false)
       setError(null)
